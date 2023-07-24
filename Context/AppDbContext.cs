@@ -11,9 +11,11 @@ namespace Role_Management_.NET.Context
         }
 
         public DbSet<User> Users { get; set; }
+        public DbSet<Roles> Roles { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<User>().ToTable("users");
+            modelBuilder.Entity<Roles>().ToTable("users");
         }
     }
 }
