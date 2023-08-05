@@ -2,6 +2,14 @@
 
 namespace Role_Management_BackEnd.Models
 {
+    public enum RoleType
+    {
+        Admin,
+        Moderator,
+        User,
+        Guest
+        // Add more roles as needed
+    }
     public class User
     {
         [Key]
@@ -12,7 +20,7 @@ namespace Role_Management_BackEnd.Models
         public string? Password { get; set; }
         public string? UserEmail { get; set; }
         public string? Token { get; set; }
-        public string? Role { get; set; }
+        public RoleType? Role { get; set; }
         public string? RefreshToken { get; set; }
         public DateTime RefreshTokenExpiryTime { get; set; }
     }

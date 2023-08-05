@@ -147,6 +147,34 @@ namespace Role_Management_BackEnd.Controllers
 
         }
 
+
+        [Authorize]
+        [HttpPost("addrole")]
+        public IActionResult AddRole([FromBody] string roleName)
+        {
+            if (string.IsNullOrWhiteSpace(roleName))
+                return BadRequest("Role name cannot be empty.");
+
+            roleName = roleName.Trim();
+
+            // Check if the role already exists in the enum
+            if (Enum.TryParse<RoleType>(roleName, out _))
+                return BadRequest("Role already exists.");
+
+            // Add the new role to the RoleType enum
+            RoleType newRole = (RoleType)Enum.Parse(typeof(RoleType), roleName, ignoreCase: true);
+
+            return Ok(new { Message = "Role added successfully." });
+        }
+
+        [Authorize]
+        [HttpGet("getroles")]
+        public IActionResult GetRoles()
+        {
+            var roles = Enum.GetNames(typeof(RoleType));
+            return Ok(roles);
+        }
+
         [Authorize]
         [HttpGet("getusers")]
         public async Task<ActionResult<User>> GetAllUsers()
