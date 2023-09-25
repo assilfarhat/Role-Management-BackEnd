@@ -49,7 +49,6 @@ namespace Role_Management_BackEnd.Controllers
 
             return Ok(new TokenApiDto()
             {
-
                 AccessToken = newAccessToken,
                 RefreshToken = newRefreshToken
             });
@@ -69,10 +68,9 @@ namespace Role_Management_BackEnd.Controllers
             if (await CheckUsernameExistAsync(userObj.UserName))
                 return BadRequest(new { Message = "Username Already Exist" });
 
-
-
             userObj.Password = PasswordHasher.HashPassword(userObj.Password);
-            userObj.Role = "User";
+
+            userObj.Role = "SuperAdmin";
             userObj.Token = "";
             await _authContext.AddAsync(userObj);
             await _authContext.SaveChangesAsync();
@@ -110,7 +108,7 @@ namespace Role_Management_BackEnd.Controllers
             var key = Encoding.ASCII.GetBytes("veryverysceret.....");
             var identity = new ClaimsIdentity(new Claim[]
             {
-                new Claim(ClaimTypes.Role, user.Role),
+                new Claim(ClaimTypes.Role, user.Role.ToString()),
                 new Claim(ClaimTypes.Name,$"{user.UserName}")
             });
 
@@ -147,7 +145,7 @@ namespace Role_Management_BackEnd.Controllers
 
         }
 
-
+/*
         [Authorize]
         [HttpPost("addrole")]
         public IActionResult AddRole([FromBody] string roleName)
@@ -165,17 +163,71 @@ namespace Role_Management_BackEnd.Controllers
             RoleType newRole = (RoleType)Enum.Parse(typeof(RoleType), roleName, ignoreCase: true);
 
             return Ok(new { Message = "Role added successfully." });
-        }
+        }*/
 
-        [Authorize]
+      /*  [Authorize]
         [HttpGet("getroles")]
         public IActionResult GetRoles()
         {
             var roles = Enum.GetNames(typeof(RoleType));
             return Ok(roles);
+        }*/
+
+       
+
+        [Authorize] 
+        [HttpDelete("delete/{id}")]
+        public async Task<IActionResult> DeleteUser(int id)
+        {
+            
+            var user = await _authContext.Users
+               .FirstOrDefaultAsync(x => x.Id == id);
+
+            if (user == null)
+                return NotFound(new { Message = "User not found!" });
+
+            _authContext.Users.Remove(user);
+            await _authContext.SaveChangesAsync();
+
+            return Ok(new { Message = "User deleted successfully." });
+        }
+
+        [Authorize] 
+        [HttpPut("UpdateUser/{id}")]
+        public async Task<IActionResult> UpdateUser(int id, [FromBody] User userObj)
+        {
+            if (userObj == null)
+                return BadRequest();
+
+            var existingUser = await _authContext.Users.FindAsync(id);
+            if (existingUser == null)
+                return NotFound(new { Message = "User not found!" });
+
+            // Perform updates on the existing user object based on userObj properties
+            existingUser.UserName = userObj.UserName;
+            existingUser.FirstName = userObj.FirstName;
+            existingUser.LastName = userObj.LastName;
+            existingUser.Role = userObj.Role; // Update user role
+
+            await _authContext.SaveChangesAsync();
+
+            return Ok(new { Message = "User updated successfully." });
         }
 
         [Authorize]
+        [HttpGet("GetUserById/{id}")]
+        public async Task<ActionResult<User>> GetUserById(int id)
+        {
+            var user = await _authContext.Users.FindAsync(id);
+            if (user == null)
+                return NotFound(new { Message = "User not found!" });
+
+            return Ok(user);
+        }
+
+
+
+        //[Authorize]
         [HttpGet("getusers")]
         public async Task<ActionResult<User>> GetAllUsers()
         {
